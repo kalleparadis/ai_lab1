@@ -353,6 +353,39 @@ public class AgentController {
 		return list.isEmpty() || list == null;
 	}
 	
+	public static long getUtility(GameBoardState state, PlayerTurn player) {
+		long utility = 0;
+		if (player == PlayerTurn.PLAYER_ONE) {
+			utility = state.getBlackCount() - state.getWhiteCount();
+			utility = state.getStaticScore(BoardCellState.BLACK);
+		} else if (player == PlayerTurn.PLAYER_TWO) {
+			utility = state.getWhiteCount() - state.getBlackCount();
+			utility = state.getStaticScore(BoardCellState.WHITE);
+		}
+		return utility;
+	}
+	
+	public static MoveWrapper getMinimaxMove(GameBoardState state, PlayerTurn player) {
+		List<ObjectiveWrapper> moves = getAvailableMoves(state, player);
+		
+		if(moves.isEmpty()){
+			return null;
+		}
+		
+		if (isTerminal(state, player) ) { //|| !cutOffTest()
+			
+		}
+		
+		MoveWrapper resMove = null;
+		
+		for (ObjectiveWrapper move : moves) {
+			resMove = getMinimaxMove(getNewState(state, move), player);
+		}
+		
+		return null;
+//		return new MoveWrapper(resMove);
+	}
+	
 	/**
 	 * Returns the best move for said player given said state.
 	 * @param state : The current state of the board
