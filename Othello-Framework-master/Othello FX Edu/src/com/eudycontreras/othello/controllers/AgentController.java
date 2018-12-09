@@ -48,8 +48,11 @@ import main.UserSettings;
  */
 public class AgentController {
 	
-	public static ObjectiveWrapper bestMinimaxMove = null;
-	public static long startingTime;
+	// Minimax
+	private static ObjectiveWrapper bestMinimaxMove = null;
+	private static long startingTime;
+	private static int searchDepth; // The depth of the search
+	private static int nodesExamined; // How many nodes were examined
 
 	public static final DeepeningType DEEPENING = UserSettings.DEEPENING;
 
@@ -372,18 +375,19 @@ public class AgentController {
 		startingTime = System.currentTimeMillis();
 		long bestMoveUtility = maxValue(state, player);
 		ObjectiveWrapper resMove = bestMinimaxMove;
+		
+		System.out.println("How many nodes were examined: " + nodesExamined);
+		System.out.println("The depth of the search: " + searchDepth); // Hur räknar man detta?
+		
 		return new MoveWrapper(resMove);
 	}
 	
 	private static long maxValue(GameBoardState state, PlayerTurn player) {
+		nodesExamined++; // Är detta rätt sätt att räkna antalet besökta noder?
 		List<ObjectiveWrapper> moves = getAvailableMoves(state, player);
-		
-		//|| !cutOffTest()
 		if(moves.isEmpty() || timeLimitExceeded(UserSettings.MAX_SEARCH_TIME, startingTime)) return getUtility(state, player); 
-		//if (isTerminal(state, player)) return getUtility(state, player);
 		
 		long value = Long.MIN_VALUE;
-		
 		for (ObjectiveWrapper move : moves) {
 			long newValue = minValue(getNewState(state, move), player);
 			if (newValue > value) {
@@ -395,14 +399,11 @@ public class AgentController {
 	}
 	
 	private static long minValue(GameBoardState state, PlayerTurn player) {
+		nodesExamined++; // Är detta rätt sätt att räkna antalet besökta noder?
 		List<ObjectiveWrapper> moves = getAvailableMoves(state, player);
-		
-		//|| !cutOffTest()
 		if(moves.isEmpty() || timeLimitExceeded(UserSettings.MAX_SEARCH_TIME, startingTime)) return getUtility(state, player);
-		//if (isTerminal(state, player)) return getUtility(state, player);
 		
 		long value = Long.MAX_VALUE;
-		
 		for (ObjectiveWrapper move : moves) {
 			long newValue = maxValue(getNewState(state, move), player);
 			if (newValue < value) {
