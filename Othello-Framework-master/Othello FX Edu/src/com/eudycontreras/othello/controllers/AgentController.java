@@ -51,8 +51,8 @@ public class AgentController {
 	// Minimax
 	private static ObjectiveWrapper bestMinimaxMove = null;
 	private static long startingTime;
-	private static int searchDepth; // The depth of the search
-	private static int nodesExamined; // How many nodes were examined
+	private static int searchDepth = 0; // The depth of the search
+	private static int nodesExamined = 0; // How many nodes were examined
 
 	public static final DeepeningType DEEPENING = UserSettings.DEEPENING;
 
@@ -383,10 +383,10 @@ public class AgentController {
 	}
 	
 	private static long maxValue(GameBoardState state, PlayerTurn player) {
-		nodesExamined++; // Är detta rätt sätt att räkna antalet besökta noder?
 		List<ObjectiveWrapper> moves = getAvailableMoves(state, player);
 		if(moves.isEmpty() || timeLimitExceeded(UserSettings.MAX_SEARCH_TIME, startingTime)) return getUtility(state, player); 
 		
+		nodesExamined++; // Är detta rätt sätt att räkna antalet besökta noder?
 		long value = Long.MIN_VALUE;
 		for (ObjectiveWrapper move : moves) {
 			long newValue = minValue(getNewState(state, move), player);
@@ -399,10 +399,13 @@ public class AgentController {
 	}
 	
 	private static long minValue(GameBoardState state, PlayerTurn player) {
-		nodesExamined++; // Är detta rätt sätt att räkna antalet besökta noder?
 		List<ObjectiveWrapper> moves = getAvailableMoves(state, player);
 		if(moves.isEmpty() || timeLimitExceeded(UserSettings.MAX_SEARCH_TIME, startingTime)) return getUtility(state, player);
 		
+		// Är detta rätt sätt att räkna antalet besökta noder? 
+		// borde iaf vara efter första if-satsen, om det inte finns några moves
+		// eller om tiden gått ut så kommer vi ju inte att undersöka flera noder alls
+		nodesExamined++;
 		long value = Long.MAX_VALUE;
 		for (ObjectiveWrapper move : moves) {
 			long newValue = maxValue(getNewState(state, move), player);
