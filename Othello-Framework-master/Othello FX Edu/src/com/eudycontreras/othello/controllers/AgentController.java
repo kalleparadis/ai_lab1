@@ -47,6 +47,8 @@ import main.UserSettings;
  * @author Eudy Contreras
  */
 public class AgentController {
+	
+	public static ObjectiveWrapper bestMinimaxMove = null;
 
 	public static final DeepeningType DEEPENING = UserSettings.DEEPENING;
 
@@ -357,46 +359,35 @@ public class AgentController {
 		long utility = 0;
 		if (player == PlayerTurn.PLAYER_ONE) {
 			utility = state.getBlackCount() - state.getWhiteCount();
-			utility = state.getStaticScore(BoardCellState.BLACK);
+//			utility = state.getStaticScore(BoardCellState.BLACK);
 		} else if (player == PlayerTurn.PLAYER_TWO) {
 			utility = state.getWhiteCount() - state.getBlackCount();
-			utility = state.getStaticScore(BoardCellState.WHITE);
+//			utility = state.getStaticScore(BoardCellState.WHITE);
 		}
 		return utility;
 	}
 	
 	public static MoveWrapper getMinimaxMove(GameBoardState state, PlayerTurn player) {
-		List<ObjectiveWrapper> moves = getAvailableMoves(state, player);
-		
-		if(moves.isEmpty()){
-			return null;
-		}
-		
-		if (isTerminal(state, player) ) { //|| !cutOffTest()
-			long value = getUtility(state, player);
-		}
-		
-		MoveWrapper resMove = null;
-		
-		for (ObjectiveWrapper move : moves) {
-			resMove = getMinimaxMove(getNewState(state, move), player);
-		}
-		
-		return null;
-//		return new MoveWrapper(resMove);
+		long bestMoveUtility = maxValue(state, player);
+		ObjectiveWrapper resMove = bestMinimaxMove;
+		return new MoveWrapper(resMove);
 	}
 	
 	private static long maxValue(GameBoardState state, PlayerTurn player) {
 		List<ObjectiveWrapper> moves = getAvailableMoves(state, player);
 		
-		if(moves.isEmpty()) return getUtility(state, player);
-		if (isTerminal(state, player)) return getUtility(state, player);
+		//|| !cutOffTest()
+		if(moves.isEmpty()) return getUtility(state, player); 
+		//if (isTerminal(state, player)) return getUtility(state, player);
 		
 		long value = Long.MIN_VALUE;
 		
 		for (ObjectiveWrapper move : moves) {
 			long newValue = minValue(getNewState(state, move), player);
-			value = Math.max(value, newValue);
+			if (newValue > value) {
+				value = newValue;
+				bestMinimaxMove = move;
+			}
 		}
 		return value;
 	}
@@ -404,14 +395,18 @@ public class AgentController {
 	private static long minValue(GameBoardState state, PlayerTurn player) {
 		List<ObjectiveWrapper> moves = getAvailableMoves(state, player);
 		
+		//|| !cutOffTest()
 		if(moves.isEmpty()) return getUtility(state, player);
-		if (isTerminal(state, player)) return getUtility(state, player);
+		//if (isTerminal(state, player)) return getUtility(state, player);
 		
 		long value = Long.MAX_VALUE;
 		
 		for (ObjectiveWrapper move : moves) {
 			long newValue = maxValue(getNewState(state, move), player);
-			value = Math.min(value, newValue);
+			if (newValue < value) {
+				value = newValue;
+				bestMinimaxMove = move;
+			}
 		}
 		return value;
 	}

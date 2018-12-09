@@ -57,7 +57,7 @@ public class MinimaxAgent extends Agent{
 		
 		ThreadManager.pause(TimeSpan.millis(waitTime)); // Pauses execution for the wait time to cause delay
 		
-		return AgentController.getExampleMove(gameState, playerTurn); // returns an example AI move Note: this is not AB Pruning
+		return AgentController.getMinimaxMove(gameState, playerTurn); // returns an example AI move Note: this is not AB Pruning
 	}
 
 }
