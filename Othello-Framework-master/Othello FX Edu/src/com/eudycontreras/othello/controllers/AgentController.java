@@ -373,7 +373,7 @@ public class AgentController {
 		}
 		
 		if (isTerminal(state, player) ) { //|| !cutOffTest()
-			
+			long value = getUtility(state, player);
 		}
 		
 		MoveWrapper resMove = null;
@@ -384,6 +384,36 @@ public class AgentController {
 		
 		return null;
 //		return new MoveWrapper(resMove);
+	}
+	
+	private static long maxValue(GameBoardState state, PlayerTurn player) {
+		List<ObjectiveWrapper> moves = getAvailableMoves(state, player);
+		
+		if(moves.isEmpty()) return getUtility(state, player);
+		if (isTerminal(state, player)) return getUtility(state, player);
+		
+		long value = Long.MIN_VALUE;
+		
+		for (ObjectiveWrapper move : moves) {
+			long newValue = minValue(getNewState(state, move), player);
+			value = Math.max(value, newValue);
+		}
+		return value;
+	}
+	
+	private static long minValue(GameBoardState state, PlayerTurn player) {
+		List<ObjectiveWrapper> moves = getAvailableMoves(state, player);
+		
+		if(moves.isEmpty()) return getUtility(state, player);
+		if (isTerminal(state, player)) return getUtility(state, player);
+		
+		long value = Long.MAX_VALUE;
+		
+		for (ObjectiveWrapper move : moves) {
+			long newValue = maxValue(getNewState(state, move), player);
+			value = Math.min(value, newValue);
+		}
+		return value;
 	}
 	
 	/**
