@@ -404,7 +404,7 @@ public class AgentController {
 		
 		// Är detta rätt sätt att räkna antalet besökta noder? 
 		// borde iaf vara efter första if-satsen, om det inte finns några moves
-		// eller om tiden gått ut så kommer vi ju inte att undersöka flera noder alls
+		// eller om tiden gått ut så kommer vi ju inte att undersöka flera noder
 		nodesExamined++;
 		long value = Long.MAX_VALUE;
 		for (ObjectiveWrapper move : moves) {
