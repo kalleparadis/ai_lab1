@@ -49,6 +49,7 @@ import main.UserSettings;
 public class AgentController {
 	
 	public static ObjectiveWrapper bestMinimaxMove = null;
+	public static long startingTime;
 
 	public static final DeepeningType DEEPENING = UserSettings.DEEPENING;
 
@@ -368,6 +369,7 @@ public class AgentController {
 	}
 	
 	public static MoveWrapper getMinimaxMove(GameBoardState state, PlayerTurn player) {
+		startingTime = System.currentTimeMillis();
 		long bestMoveUtility = maxValue(state, player);
 		ObjectiveWrapper resMove = bestMinimaxMove;
 		return new MoveWrapper(resMove);
@@ -377,7 +379,7 @@ public class AgentController {
 		List<ObjectiveWrapper> moves = getAvailableMoves(state, player);
 		
 		//|| !cutOffTest()
-		if(moves.isEmpty()) return getUtility(state, player); 
+		if(moves.isEmpty() || timeLimitExceeded(UserSettings.MAX_SEARCH_TIME, startingTime)) return getUtility(state, player); 
 		//if (isTerminal(state, player)) return getUtility(state, player);
 		
 		long value = Long.MIN_VALUE;
@@ -396,7 +398,7 @@ public class AgentController {
 		List<ObjectiveWrapper> moves = getAvailableMoves(state, player);
 		
 		//|| !cutOffTest()
-		if(moves.isEmpty()) return getUtility(state, player);
+		if(moves.isEmpty() || timeLimitExceeded(UserSettings.MAX_SEARCH_TIME, startingTime)) return getUtility(state, player);
 		//if (isTerminal(state, player)) return getUtility(state, player);
 		
 		long value = Long.MAX_VALUE;
@@ -405,7 +407,6 @@ public class AgentController {
 			long newValue = maxValue(getNewState(state, move), player);
 			if (newValue < value) {
 				value = newValue;
-				bestMinimaxMove = move;
 			}
 		}
 		return value;
