@@ -5,8 +5,6 @@ import com.eudycontreras.othello.controllers.AgentController;
 import com.eudycontreras.othello.controllers.Agent;
 import com.eudycontreras.othello.enumerations.PlayerTurn;
 import com.eudycontreras.othello.models.GameBoardState;
-import com.eudycontreras.othello.threading.ThreadManager;
-import com.eudycontreras.othello.threading.TimeSpan;
 
 /**
  * <H2>Created by</h2> Eudy Contreras
@@ -35,29 +33,9 @@ public class MinimaxAgent extends Agent{
 	
 	}
 
-	/**
-	 * Delete the content of this method and Implement your logic here!
-	 */
 	@Override
 	public AgentMove getMove(GameBoardState gameState) {
-		return getExampleMove(gameState);
-	}
-	
-	/**
-	 * Default template move which serves as an example of how to implement move
-	 * making logic. Note that this method does not use Alpha beta pruning and
-	 * the use of this method can disqualify you
-	 * 
-	 * @param gameState
-	 * @return
-	 */
-	private AgentMove getExampleMove(GameBoardState gameState){
-		
-		int waitTime = UserSettings.MIN_SEARCH_TIME; // 1.5 seconds
-		
-		ThreadManager.pause(TimeSpan.millis(waitTime)); // Pauses execution for the wait time to cause delay
-		
-		return AgentController.getMinimaxMove(gameState, playerTurn); // returns an example AI move Note: this is not AB Pruning
+		return AgentController.getMinimaxMove(gameState, playerTurn);
 	}
 
 }
