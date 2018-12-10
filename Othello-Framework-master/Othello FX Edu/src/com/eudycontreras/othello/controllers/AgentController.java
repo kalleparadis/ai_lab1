@@ -360,6 +360,9 @@ public class AgentController {
 		return list.isEmpty() || list == null;
 	}
 	
+	/**
+	 * A heuristic evaluation function that returns the payout of a given state.
+	 */
 	public static long getUtility(GameBoardState state, PlayerTurn player) {
 		long utility = 0;
 		if (player == PlayerTurn.PLAYER_ONE) {
@@ -372,6 +375,10 @@ public class AgentController {
 		return utility;
 	}
 	
+	/**
+	 * Calls the minimax algorithm with alpha-beta pruning.
+	 * Returns the move determined by the algorithm.
+	 */
 	public static MoveWrapper getMinimaxMove(GameBoardState state, PlayerTurn player) {
 		startingTime = System.currentTimeMillis();
 		searchDepthHighscore = 0;
@@ -386,6 +393,10 @@ public class AgentController {
 		return new MoveWrapper(resMove);
 	}
 	
+	/**
+	 * Part of the minimax algorithm with alpha-beta pruning.
+	 * This method is called recursively.
+	 */
 	private static long maxValue(GameBoardState state, PlayerTurn player, long alpha, long beta) {
 		searchDepthHighscore = Math.max(++searchDepth, searchDepthHighscore);
 		++nodesExamined;
@@ -407,19 +418,16 @@ public class AgentController {
 		return value;
 	}
 	
+	/**
+	 * Part of the minimax algorithm with alpha-beta pruning.
+	 * This method is called recursively.
+	 */
 	private static long minValue(GameBoardState state, PlayerTurn player, long alpha, long beta) {
 		searchDepthHighscore = Math.max(++searchDepth, searchDepthHighscore);
 		++nodesExamined;
 		List<ObjectiveWrapper> moves = getAvailableMoves(state, player);
 		if(moves.isEmpty() || timeLimitExceeded(UserSettings.MAX_SEARCH_TIME, startingTime)) return getUtility(state, player);
 		
-		// Är detta rätt sätt att räkna antalet besökta noder? 
-		// borde iaf vara efter första if-satsen, om det inte finns några moves
-		// eller om tiden gått ut så kommer vi ju inte att undersöka flera noder
-		
-		// Om det inte finns några moves så betyder det att vi kommit till en nod utan barn, alltså ett löv. (om tiden gått ut kan man se alla noder som löv)
-		// Om vi returnerar innan vi ökat nodesExamined kommer vi inte räkna in löven i trädet.
-		// Jag flyttar därför upp räkaren igen.
 		long value = Long.MAX_VALUE;
 		for (ObjectiveWrapper move : moves) {
 			PlayerTurn opponent = GameTreeUtility.getCounterPlayer(player);
