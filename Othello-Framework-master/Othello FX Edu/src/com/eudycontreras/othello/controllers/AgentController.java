@@ -373,7 +373,7 @@ public class AgentController {
 	
 	public static MoveWrapper getMinimaxMove(GameBoardState state, PlayerTurn player) {
 		startingTime = System.currentTimeMillis();
-		long bestMoveUtility = maxValue(state, player);
+		long bestMoveUtility = maxValue(state, player, Long.MIN_VALUE, Long.MAX_VALUE);
 		ObjectiveWrapper resMove = bestMinimaxMove;
 		
 		System.out.println("How many nodes were examined: " + nodesExamined);
@@ -382,23 +382,25 @@ public class AgentController {
 		return new MoveWrapper(resMove);
 	}
 	
-	private static long maxValue(GameBoardState state, PlayerTurn player) {
+	private static long maxValue(GameBoardState state, PlayerTurn player, long alpha, long beta) {
 		List<ObjectiveWrapper> moves = getAvailableMoves(state, player);
 		if(moves.isEmpty() || timeLimitExceeded(UserSettings.MAX_SEARCH_TIME, startingTime)) return getUtility(state, player); 
 		
 		nodesExamined++; // Är detta rätt sätt att räkna antalet besökta noder?
 		long value = Long.MIN_VALUE;
 		for (ObjectiveWrapper move : moves) {
-			long newValue = minValue(getNewState(state, move), player);
+			long newValue = minValue(getNewState(state, move), player, alpha, beta);
 			if (newValue > value) {
 				value = newValue;
 				bestMinimaxMove = move;
 			}
+			if (value >= beta) return value;
+			alpha = Math.max(alpha, value);
 		}
 		return value;
 	}
 	
-	private static long minValue(GameBoardState state, PlayerTurn player) {
+	private static long minValue(GameBoardState state, PlayerTurn player, long alpha, long beta) {
 		List<ObjectiveWrapper> moves = getAvailableMoves(state, player);
 		if(moves.isEmpty() || timeLimitExceeded(UserSettings.MAX_SEARCH_TIME, startingTime)) return getUtility(state, player);
 		
@@ -408,10 +410,12 @@ public class AgentController {
 		nodesExamined++;
 		long value = Long.MAX_VALUE;
 		for (ObjectiveWrapper move : moves) {
-			long newValue = maxValue(getNewState(state, move), player);
+			long newValue = maxValue(getNewState(state, move), player, alpha, beta);
 			if (newValue < value) {
 				value = newValue;
 			}
+			if (value <= alpha) return value;
+			beta = Math.min(beta, value);
 		}
 		return value;
 	}
