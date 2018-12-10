@@ -52,6 +52,7 @@ public class AgentController {
 	private static ObjectiveWrapper bestMinimaxMove = null;
 	private static long startingTime;
 	private static int searchDepth = 0; // The depth of the search
+	private static int searchDepthHighscore = 0;
 	private static int nodesExamined = 0; // How many nodes were examined
 
 	public static final DeepeningType DEEPENING = UserSettings.DEEPENING;
@@ -373,23 +374,29 @@ public class AgentController {
 	
 	public static MoveWrapper getMinimaxMove(GameBoardState state, PlayerTurn player) {
 		startingTime = System.currentTimeMillis();
+		searchDepthHighscore = 0;
+		nodesExamined = 0;
 		long bestMoveUtility = maxValue(state, player, Long.MIN_VALUE, Long.MAX_VALUE);
 		ObjectiveWrapper resMove = bestMinimaxMove;
 		
 		System.out.println("How many nodes were examined: " + nodesExamined);
-		System.out.println("The depth of the search: " + searchDepth); // Hur räknar man detta?
+		System.out.println("The depth of the search: " + searchDepthHighscore);
+		System.out.println("bestMoveUtility: " + bestMoveUtility);
 		
 		return new MoveWrapper(resMove);
 	}
 	
 	private static long maxValue(GameBoardState state, PlayerTurn player, long alpha, long beta) {
+		searchDepthHighscore = Math.max(++searchDepth, searchDepthHighscore);
+		++nodesExamined;
 		List<ObjectiveWrapper> moves = getAvailableMoves(state, player);
 		if(moves.isEmpty() || timeLimitExceeded(UserSettings.MAX_SEARCH_TIME, startingTime)) return getUtility(state, player); 
 		
-		nodesExamined++; // Är detta rätt sätt att räkna antalet besökta noder?
 		long value = Long.MIN_VALUE;
 		for (ObjectiveWrapper move : moves) {
-			long newValue = minValue(getNewState(state, move), player, alpha, beta);
+			PlayerTurn opponent = GameTreeUtility.getCounterPlayer(player);
+			long newValue = minValue(getNewState(state, move), opponent, alpha, beta);
+			--searchDepth;
 			if (newValue > value) {
 				value = newValue;
 				bestMinimaxMove = move;
@@ -401,16 +408,23 @@ public class AgentController {
 	}
 	
 	private static long minValue(GameBoardState state, PlayerTurn player, long alpha, long beta) {
+		searchDepthHighscore = Math.max(++searchDepth, searchDepthHighscore);
+		++nodesExamined;
 		List<ObjectiveWrapper> moves = getAvailableMoves(state, player);
 		if(moves.isEmpty() || timeLimitExceeded(UserSettings.MAX_SEARCH_TIME, startingTime)) return getUtility(state, player);
 		
 		// Är detta rätt sätt att räkna antalet besökta noder? 
 		// borde iaf vara efter första if-satsen, om det inte finns några moves
 		// eller om tiden gått ut så kommer vi ju inte att undersöka flera noder
-		nodesExamined++;
+		
+		// Om det inte finns några moves så betyder det att vi kommit till en nod utan barn, alltså ett löv. (om tiden gått ut kan man se alla noder som löv)
+		// Om vi returnerar innan vi ökat nodesExamined kommer vi inte räkna in löven i trädet.
+		// Jag flyttar därför upp räkaren igen.
 		long value = Long.MAX_VALUE;
 		for (ObjectiveWrapper move : moves) {
-			long newValue = maxValue(getNewState(state, move), player, alpha, beta);
+			PlayerTurn opponent = GameTreeUtility.getCounterPlayer(player);
+			long newValue = maxValue(getNewState(state, move), opponent, alpha, beta);
+			--searchDepth;
 			if (newValue < value) {
 				value = newValue;
 			}
