@@ -1,2 +1,2 @@
 # ai_lab1
-Lab 1, från kursen: Artificial Intelligence (DA272A)
+Lab 1, från kursen: Artificial Intelligence (DA272A), ht 2018.
